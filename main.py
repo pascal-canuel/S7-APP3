@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # ---------------- Paramètres et hyperparamètres ----------------#
     force_cpu = False  # Forcer a utiliser le cpu?
-    trainning = True  # Entrainement?
+    trainning = False  # Entrainement?
     test = True  # Test?
     learning_curves = False  # Affichage des courbes d'entrainement?
     gen_test_images = True  # Génération images test?
@@ -55,7 +55,6 @@ if __name__ == '__main__':
     # Instanciation des dataloaders
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, num_workers=n_workers)
     val_loader = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=n_workers)
-    test_loader = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=n_workers)
 
     # Instanciation du model
     model = trajectory2seq(
@@ -68,19 +67,21 @@ if __name__ == '__main__':
         maxlen=dataset.max_len
     )
 
+    print('Model : \n', model, '\n')
+    print('Nombre de poids: ', sum([i.numel() for i in model.parameters()]))
+
     # Initialisation des variables
-    # À compléter
 
     if trainning:
 
         # Initialisation affichage
+        train_dist = []  # Historique des distances
+        train_loss = []  # Historique des coûts
+
+        val_dist = []  # Historique des distances
+        val_loss = []  # Historique des coûts
+
         if learning_curves:
-            train_dist = []  # Historique des distances
-            train_loss = []  # Historique des coûts
-
-            val_dist = []  # Historique des distances
-            val_loss = []  # Historique des coûts
-
             fig, (ax1, ax2) = plt.subplots(1, 2)
 
         # Fonction de coût et optimizateur
@@ -162,7 +163,7 @@ if __name__ == '__main__':
                     Mb = b.index(1) if 1 in b else len(b)  # longueur mot b
                     dist_val += edit_distance(a[:Ma], b[:Mb]) / batch_size
 
-                    # Affichage pendant l'entraînement
+                    # Affichage pendant la validation
                     print(
                         'Validation - Epoch: {}/{} [{}/{} ({:.0f}%)] Average Loss: {:.6f} Average Edit Distance: {:.6f}'.format(
                             epoch, n_epochs, batch_idx * batch_size, len(val_loader.dataset),
@@ -208,10 +209,25 @@ if __name__ == '__main__':
 
     if test:
         # Évaluation
-        # À compléter
+        model = torch.load('model.pt')
 
-        # Charger les données de tests
-        # À compléter
+        for i in range(10):
+            handwritten_seq, target_seq = dataset_test[np.random.randint(0, len(dataset_test))]
+            handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
+            target_seq = target_seq.type(torch.LongTensor).to(device)
+
+            handwritten_seq = torch.unsqueeze(handwritten_seq, dim=0)
+            output, hidden, attn = model(handwritten_seq)
+
+            output_list = torch.argmax(output, dim=-1).detach().cpu().squeeze().tolist()
+            target_seq_list = target_seq.detach().cpu().tolist()
+
+            out_seq = [dataset_test.int2symb['word'][c] for c in output_list]
+            target = [dataset_test.int2symb['word'][c] for c in target_seq_list]
+
+            print(f'Example {i}')
+            print('Output: ', ' '.join(out_seq))
+            print('Target: ', ' '.join(target), '\r\n')
 
         # Affichage de l'attention
         # À compléter (si nécessaire)
