@@ -229,6 +229,10 @@ if __name__ == '__main__':
             print('Output: ', ' '.join(out_seq))
             print('Target: ', ' '.join(target), '\r\n')
 
+            labels = list(dataset_test.symb2int['word'].keys())
+            confusion_matrix(target, out_seq, labels=labels) # for test only
+        
+
         # Affichage de l'attention
         # À compléter (si nécessaire)
 
@@ -237,5 +241,6 @@ if __name__ == '__main__':
 
         # Affichage de la matrice de confusion
         # À compléter
+        # confusion_matrix(target, out_seq)
 
         pass
