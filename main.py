@@ -35,8 +35,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() and not force_cpu else "cpu")
 
     # Instanciation de l'ensemble de données
-    # À compléter
-
+    dataset = HandwrittenWords()
     
     # Séparation de l'ensemble de données (entraînement et validation)
     # À compléter
