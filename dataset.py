@@ -21,18 +21,21 @@ class HandwrittenWords(Dataset):
         # Extraction des symboles
         alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
-        self.char2int = dict()
-        self.char2int = {start_symbol: 0, stop_symbol: 1, pad_symbol: 2}
+        self.symb2int = dict()
+        self.symb2int['handwritten'] = {}
+        self.symb2int['word'] = {start_symbol: 0, stop_symbol: 1, pad_symbol: 2}
 
         for i, char in enumerate(alphabet):
-            self.char2int[char] = i + 3
+            self.symb2int['word'][char] = i + 3
 
-        self.int2char = dict()
-        self.int2char = {v: k for k, v in self.char2int.items()}
+        self.int2symb = dict()
+        self.int2symb['handwritten'] = {}
+        self.int2symb['word'] = {v: k for k, v in self.symb2int['word'].items()}
 
         # Ajout du padding aux séquences
-        max_word_len = max([len(seq[0]) for seq in self.data]) + 1
-        max_handwritten_seq_len = max([seq[1].shape[1] for seq in self.data]) + 1
+        self.max_len = dict()
+        self.max_len['word'] = max([len(seq[0]) for seq in self.data]) + 1
+        self.max_len['handwritten'] = max([seq[1].shape[1] for seq in self.data])
 
         self.padded_data = dict()
         self.padded_data['word'] = {} # target
@@ -44,29 +47,32 @@ class HandwrittenWords(Dataset):
             handwritten = item[1]
 
             word.append(self.stop_symbol)
-            while len(word) < max_word_len:
+            while len(word) < self.max_len['word']:
                 word.append(self.pad_symbol)
 
             # get last value of handwritten sequence
             last_coord = handwritten[:, -1]
-            while handwritten.shape[1] < max_handwritten_seq_len:
+            while handwritten.shape[1] < self.max_len['handwritten']:
+                # TODO: test padding with another value
                 handwritten = np.concatenate((handwritten, last_coord.reshape(-1, 1)), axis=1)
 
             self.padded_data['word'][i] = word
             self.padded_data['handwritten'][i] = handwritten
-        
+
+        self.dict_size = {'word': len(self.int2symb['word']), 'handwritten': len(self.int2symb['handwritten'])}
+
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         handwritten = self.padded_data['handwritten'][idx]
         word = self.padded_data['word'][idx]
-        word = [self.char2int[i] for i in word]
+        word = [self.symb2int['word'][i] for i in word]
         return torch.tensor(handwritten), torch.tensor(word)
 
     def visualisation(self, idx):
         handwritten, word = [i.numpy() for i in self[idx]]
-        word = [self.int2char[c] for c in word]
+        word = [self.int2symb['word'][c] for c in word]
         # print('Word: ', ' '.join(word))
         # print('Handwritten: ', handwritten)
         # plot handwritten 2 sequence of coordinates

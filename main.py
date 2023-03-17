@@ -22,9 +22,13 @@ if __name__ == '__main__':
     n_workers = 0           # Nombre de threads pour chargement des données (mettre à 0 sur Windows)
 
     # À compléter
-    n_epochs = 0
+    n_epochs = 20   # Nombre d'iteration sur l'ensemble de donnees
+    lr = 0.01  # Taux d'apprentissage pour l'optimizateur
     batch_size = 64  # Taille des lots pour l'entraînement
     train_val_split = 0.7  # Proportion d'échantillons
+
+    hidden_dim = 20  # Nombre de neurones caches par couche
+    n_layers = 2  # Nombre de de couches
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
 
@@ -45,7 +49,6 @@ if __name__ == '__main__':
     n_val_samples = len(dataset) - n_train_samples
 
     dataset_train, dataset_val = torch.utils.data.random_split(dataset, [n_train_samples, n_val_samples])
-   
 
     # Instanciation des dataloaders
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, num_workers=n_workers)
@@ -54,21 +57,75 @@ if __name__ == '__main__':
 
 
     # Instanciation du model
-    # À compléter
-
+    model = trajectory2seq(
+        hidden_dim=hidden_dim,
+        n_layers=n_layers,
+        symb2int=dataset.symb2int,
+        int2symb=dataset.int2symb,
+        dict_size=dataset.dict_size,
+        device=device,
+        maxlen=dataset.max_len
+    )
 
     # Initialisation des variables
     # À compléter
 
     if trainning:
 
+        # Initialisation affichage
+        if learning_curves:
+            train_dist = [] # Historique des distances
+            train_loss= [] # Historique des coûts
+            fig, ax = plt.subplots(1) # Initialisation figure
+
         # Fonction de coût et optimizateur
-        # À compléter
+        criterion = nn.CrossEntropyLoss(ignore_index=2)  # ignorer les symboles <pad>
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
         for epoch in range(1, n_epochs + 1):
             # Entraînement
-            # À compléter
-            
+            running_loss_train = 0
+            dist = 0
+
+            for batch_idx, data in enumerate(train_loader):
+                # Formatage des données
+                handwritten_seq, target_seq = data
+                # handwritten_seq = handwritten_seq.to(device).double()
+                # target_seq = target_seq.to(device).long()
+                handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
+                target_seq = target_seq.type(torch.LongTensor).to(device)
+
+                optimizer.zero_grad()  # Mise a zero du gradient
+                output, hidden, attn = model(handwritten_seq)  # Passage avant
+                loss = criterion(output.view((-1, model.dict_size['word'])), target_seq.view(-1))
+
+                loss.backward()  # calcul du gradient
+                optimizer.step()  # Mise a jour des poids
+                running_loss_train += loss.item()
+
+                # calcul de la distance d'édition
+                output_list = torch.argmax(output, dim=-1).detach().cpu().tolist()
+                target_seq_list = target_seq.cpu().tolist()
+                M = len(output_list)
+                for i in range(M):
+                    a = target_seq_list[i]
+                    b = output_list[i]
+                    Ma = a.index(1)  # longueur mot a
+                    Mb = b.index(1) if 1 in b else len(b)  # longueur mot b
+                    dist += edit_distance(a[:Ma], b[:Mb]) / batch_size
+
+                    # Affichage pendant l'entraînement
+                    print('Train - Epoch: {}/{} [{}/{} ({:.0f}%)] Average Loss: {:.6f} Average Edit Distance: {:.6f}'.format(
+                            epoch, n_epochs, batch_idx * batch_size, len(train_loader.dataset),
+                            100. * batch_idx * batch_size / len(train_loader.dataset), running_loss_train / (batch_idx + 1),
+                            dist / len(train_loader)), end='\r')
+
+            print('Train - Epoch: {}/{} [{}/{} ({:.0f}%)] Average Loss: {:.6f} Average Edit Distance: {:.6f}'.format(
+                    epoch, n_epochs, (batch_idx + 1) * batch_size, len(train_loader.dataset),
+                    100. * (batch_idx + 1) * batch_size / len(train_loader.dataset), running_loss_train / (batch_idx + 1),
+                    dist / len(train_loader)), end='\r')
+            print('\n')
+
             # Validation
             # À compléter
 
@@ -76,14 +133,23 @@ if __name__ == '__main__':
             # À compléter
 
             # Enregistrer les poids
-            # À compléter
-
+            torch.save(model,'model.pt')
 
             # Affichage
             if learning_curves:
                 # visualization
-                # À compléter
-                pass
+                train_loss.append(running_loss_train / len(train_loader))
+                train_dist.append(dist / len(train_loader))
+                ax.cla()
+                ax.plot(train_loss, label='training loss')
+                ax.plot(train_dist, label='training distance')
+                ax.legend()
+                plt.draw()
+                plt.pause(0.01)
+
+        if learning_curves:
+            plt.show()
+            plt.close('all')
 
     if test:
         # Évaluation
