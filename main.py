@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # ---------------- Paramètres et hyperparamètres ----------------#
     force_cpu = False  # Forcer a utiliser le cpu?
-    trainning = False  # Entrainement?
+    trainning = True  # Entrainement?
     test = True  # Test?
     learning_curves = False  # Affichage des courbes d'entrainement?
     gen_test_images = True  # Génération images test?
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # À compléter
     # n_epochs = 20  # Nombre d'iteration sur l'ensemble de donnees
-    n_epochs = 1
+    n_epochs = 50
     lr = 0.01  # Taux d'apprentissage pour l'optimizateur
     batch_size = 64  # Taille des lots pour l'entraînement
     train_val_split = 0.7  # Proportion d'échantillons
