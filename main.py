@@ -23,6 +23,8 @@ if __name__ == '__main__':
 
     # À compléter
     n_epochs = 0
+    batch_size = 64  # Taille des lots pour l'entraînement
+    train_val_split = 0.7  # Proportion d'échantillons
 
     # ---------------- Fin Paramètres et hyperparamètres ----------------#
 
@@ -35,14 +37,20 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() and not force_cpu else "cpu")
 
     # Instanciation de l'ensemble de données
-    dataset = HandwrittenWords()
-    
+    dataset = HandwrittenWords('data_trainval.p')
+    # dataset_test = HandwrittenWords('data_testval.p')
+
     # Séparation de l'ensemble de données (entraînement et validation)
-    # À compléter
+    n_train_samples = int(len(dataset) * train_val_split)
+    n_val_samples = len(dataset) - n_train_samples
+
+    dataset_train, dataset_val = torch.utils.data.random_split(dataset, [n_train_samples, n_val_samples])
    
 
     # Instanciation des dataloaders
-    # À compléter
+    train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, num_workers=n_workers)
+    val_loader = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=n_workers)
+    # test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=batch_size, num_workers=num_workers)
 
 
     # Instanciation du model

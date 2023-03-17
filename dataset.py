@@ -67,8 +67,12 @@ class HandwrittenWords(Dataset):
     def visualisation(self, idx):
         handwritten, word = [i.numpy() for i in self[idx]]
         word = [self.int2char[c] for c in word]
-        print('Word: ', ' '.join(word))
-        print('Handwritten: ', handwritten)
+        # print('Word: ', ' '.join(word))
+        # print('Handwritten: ', handwritten)
+        # plot handwritten 2 sequence of coordinates
+        plt.plot(handwritten[0], handwritten[1])
+        plt.title(' '.join(word))
+        plt.show()
 
 if __name__ == "__main__":
     # Code de test pour aider à compléter le dataset
