@@ -14,19 +14,17 @@ def visualize_attention(target, prediction, attention, handwritten):
 
     for idx in range(word_len):
         axes[idx].cla()
-        # axes[idx].plot(attention[:, idx])
-        # axes[idx].plot(handwritten[0], handwritten[1])
 
         attn = attention[:, idx]
         attn = (attn - attn.min()) / (attn.max() - attn.min())
         attn = 1 - attn
 
         axes[idx].scatter(handwritten[0], handwritten[1], c=attn, cmap='gray')
-    
-        axes[idx].legend()
+        axes[idx].plot(handwritten[0], handwritten[1], c='lightgray')
+
         axes[idx].set_ylabel(prediction[idx])
-        # axes[idx].set_xticks([])
-        # axes[idx].set_yticks([])
+        axes[idx].set_xticks([])
+        axes[idx].set_yticks([])
 
     fig.tight_layout()
     plt.title(f'target: {" ".join(target)} \r\n prediction {" ".join(prediction)}')
@@ -197,9 +195,10 @@ if __name__ == '__main__':
         targets = []
         outputs = []
 
-        # for i in range(len(dataset_test)):
-        for i in range(100):
-            handwritten_seq, target_seq = dataset_test[i]
+        dt = dataset_test
+        for i in range(len(dt)):
+        # for i in range(100):
+            handwritten_seq, target_seq = dt[i]
             handwritten_seq_nan = handwritten_seq
             handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
             target_seq = target_seq.type(torch.LongTensor).to(device)
@@ -210,16 +209,16 @@ if __name__ == '__main__':
             output_list = torch.argmax(output, dim=-1).detach().cpu().squeeze().tolist()
             target_seq_list = target_seq.detach().cpu().tolist()
 
-            output_seq_symb = [dataset_test.int2symb['word'][c] for c in output_list]
-            target_seq_symb = [dataset_test.int2symb['word'][c] for c in target_seq_list]
+            output_seq_symb = [dt.int2symb['word'][c] for c in output_list]
+            target_seq_symb = [dt.int2symb['word'][c] for c in target_seq_list]
 
             targets.append(target_seq_symb)
             outputs.append(output_seq_symb)
 
             visualize_attention(target_seq_symb, output_seq_symb, torch.squeeze(attn).detach().cpu().numpy(), torch.squeeze(handwritten_seq_nan).detach().cpu().numpy())
-            # print(f'Output: {" ".join(output_seq_symb)}; Target: {" ".join(target_seq_symb)}\r\n')
+            print(f'Output: {" ".join(output_seq_symb)}; Target: {" ".join(target_seq_symb)}\r\n')
 
-        labels = list(dataset_test.symb2int['word'].keys())
+        labels = list(dt.symb2int['word'].keys())
         confusion_matrix(targets, outputs, labels)
 
         # TODO: display attention
