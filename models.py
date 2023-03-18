@@ -15,11 +15,11 @@ class trajectory2seq(nn.Module):
         self.maxlen = maxlen
 
         self.word_embedding = nn.Embedding(self.dict_size['word'], hidden_dim)
-        self.encoder_layer = nn.GRU(2, hidden_dim, n_layers, batch_first=True)
-        self.decoder_layer = nn.GRU(hidden_dim, hidden_dim, n_layers, batch_first=True)
+        self.encoder_layer = nn.GRU(2, hidden_dim, n_layers, batch_first=True, bidirectional=True)
+        self.decoder_layer = nn.GRU(hidden_dim, hidden_dim, n_layers, batch_first=True, bidirectional=True)
 
-        self.attention_combine = nn.Linear(2*hidden_dim, hidden_dim)
-        self.hidden2query = nn.Linear(hidden_dim, hidden_dim)
+        self.attention_combine = nn.Linear(4*hidden_dim, hidden_dim)
+        self.hidden2query = nn.Linear(2*hidden_dim, 2*hidden_dim)
 
         self.fc = nn.Linear(hidden_dim, self.dict_size['word'])
         self.to(device)
