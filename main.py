@@ -4,8 +4,8 @@ from dataset import *
 from metrics import *
 
 if __name__ == '__main__':
-    training = False
-    test = True
+    training = True
+    test = False
     learning_curves = True
     gen_test_images = True
     seed = 1
@@ -133,7 +133,7 @@ if __name__ == '__main__':
             val_loss.append(running_loss_val / len(val_loader))
             val_dist.append(dist_val / len(val_loader))
 
-            torch.save(model, 'model_basic_GRU.pt')
+            torch.save(model, 'model.pt')
 
             if learning_curves:
                 ax1.cla()
@@ -159,10 +159,9 @@ if __name__ == '__main__':
 
         if learning_curves:
             plt.show()
-            plt.close('all')
 
     if test:
-        model = torch.load('model_basic_GRU.pt')
+        model = torch.load('model.pt')
         dataset_test = HandwrittenWords('data_train_val.p')
 
         targets = []
