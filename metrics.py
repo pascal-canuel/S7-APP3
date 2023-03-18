@@ -36,7 +36,7 @@ def confusion_matrix(true, pred, labels):
             matrix[labels.index(true[i][j])][labels.index(pred[i][j])] += 1
 
     # https://matplotlib.org/stable/gallery/images_contours_and_fields/image_annotated_heatmap.html
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
     ax.imshow(matrix)
 
     ax.set_xticks(np.arange(len(labels)), labels=labels)
@@ -51,4 +51,5 @@ def confusion_matrix(true, pred, labels):
     ax.set_title("Confusion matrix")
     ax.set_xlabel("Prediction")
     ax.set_ylabel("Target")
+    fig.tight_layout()
     plt.show()

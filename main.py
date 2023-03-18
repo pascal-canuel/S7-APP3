@@ -3,17 +3,47 @@ from models import *
 from dataset import *
 from metrics import *
 
+
+def visualize_attention(target, prediction, attention, handwritten):
+    if len(target) != len(target) != attention.shape[1]:
+        raise ValueError("target and prediction must have the same length")
+
+    word_len = len(target)
+
+    fig, axes = plt.subplots(word_len, 1)
+
+    for idx in range(word_len):
+        axes[idx].cla()
+        # axes[idx].plot(attention[:, idx])
+        # axes[idx].plot(handwritten[0], handwritten[1])
+
+        attn = attention[:, idx]
+        attn = (attn - attn.min()) / (attn.max() - attn.min())
+        attn = 1 - attn
+
+        axes[idx].scatter(handwritten[0], handwritten[1], c=attn, cmap='gray')
+    
+        axes[idx].legend()
+        axes[idx].set_ylabel(prediction[idx])
+        # axes[idx].set_xticks([])
+        # axes[idx].set_yticks([])
+
+    fig.tight_layout()
+    plt.title(f'target: {" ".join(target)} \r\n prediction {" ".join(prediction)}')
+    plt.show()
+
+
 if __name__ == '__main__':
-    training = True
-    test = False
+    training = False
+    test = True
     learning_curves = True
     gen_test_images = True
     seed = 1
     n_workers = 0
-    n_epochs = 50
+    n_epochs = 200
     lr = 0.01
     batch_size = 64
-    train_val_split = 0.75
+    train_val_split = 0.8
     hidden_dim = 20
     n_layers = 2
 
@@ -161,15 +191,16 @@ if __name__ == '__main__':
             plt.show()
 
     if test:
-        model = torch.load('model.pt')
+        model = torch.load('model_lstm_bi_attention.pt')
         dataset_test = HandwrittenWords('data_train_val.p')
 
         targets = []
         outputs = []
 
         # for i in range(len(dataset_test)):
-        for i in range(10):
+        for i in range(100):
             handwritten_seq, target_seq = dataset_test[i]
+            handwritten_seq_nan = handwritten_seq
             handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
             target_seq = target_seq.type(torch.LongTensor).to(device)
 
@@ -185,6 +216,7 @@ if __name__ == '__main__':
             targets.append(target_seq_symb)
             outputs.append(output_seq_symb)
 
+            visualize_attention(target_seq_symb, output_seq_symb, torch.squeeze(attn).detach().cpu().numpy(), torch.squeeze(handwritten_seq_nan).detach().cpu().numpy())
             # print(f'Output: {" ".join(output_seq_symb)}; Target: {" ".join(target_seq_symb)}\r\n')
 
         labels = list(dataset_test.symb2int['word'].keys())
@@ -193,3 +225,4 @@ if __name__ == '__main__':
         # TODO: display attention
         # TODO: print test results
 
+        pass
