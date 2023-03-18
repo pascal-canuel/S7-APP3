@@ -71,7 +71,7 @@ class trajectory2seq(nn.Module):
             a, a_weights = self.attentionModule(q, encoder_outs)
 
             y = torch.cat((q, a), dim=2)
-            y = self.att_combine(y)
+            y = self.attention_combine(y)
             out = self.fc(y)
 
             vec_in = torch.argmax(out, dim=2)
