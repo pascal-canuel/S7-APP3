@@ -72,6 +72,6 @@ class HandwrittenWords(Dataset):
 
 
 if __name__ == "__main__":
-    a = HandwrittenWords('data_trainval.p')
+    a = HandwrittenWords('data_train_val.p')
     for i in range(10):
         a.visualisation(np.random.randint(0, len(a)))
