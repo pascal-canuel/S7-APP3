@@ -26,23 +26,28 @@ def visualize_attention(target, prediction, attention, handwritten):
         axes[idx].set_xticks([])
         axes[idx].set_yticks([])
 
-    fig.tight_layout()
-    plt.title(f'target: {" ".join(target)} \r\n prediction {" ".join(prediction)}')
+    plt.tight_layout()
+    #plt.title(f'target: {" ".join(target)} \r\n prediction {" ".join(prediction)}')
+
+    # make room for title
+    plt.subplots_adjust(top=0.85)
+    plt.suptitle(f'target: {" ".join(target)} \n prediction {" ".join(prediction)}', fontsize=14)
+
     plt.show()
 
 
 if __name__ == '__main__':
-    training = False
+    training = True
     test = True
     learning_curves = True
     gen_test_images = True
     seed = 1
     n_workers = 0
-    n_epochs = 200
+    n_epochs = 120
     lr = 0.01
     batch_size = 64
     train_val_split = 0.8
-    hidden_dim = 20
+    hidden_dim = 10
     n_layers = 2
 
     if seed is not None:
