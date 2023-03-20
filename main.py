@@ -37,17 +37,17 @@ def visualize_attention(target, prediction, attention, handwritten):
 
 
 if __name__ == '__main__':
-    training = True
+    training = False
     test = True
     learning_curves = True
     gen_test_images = True
     seed = 1
     n_workers = 0
     n_epochs = 400
-    lr = 0.02
+    lr = 0.01
     batch_size = 64
     train_val_split = 0.8
-    hidden_dim = 12
+    hidden_dim = 10
     n_layers = 2
 
     if seed is not None:
@@ -194,7 +194,7 @@ if __name__ == '__main__':
             plt.show()
 
     if test:
-        model = torch.load('model_lstm_bi_attention.pt')
+        model = torch.load('model.pt')
         dataset_test = HandwrittenWords('data_train_val.p')
 
         targets = []
