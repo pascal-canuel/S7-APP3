@@ -98,8 +98,8 @@ if __name__ == '__main__':
 
             for batch_idx, data in enumerate(train_loader):
                 handwritten_seq, target_seq = data
-                handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
-                target_seq = target_seq.type(torch.LongTensor).to(device)
+                handwritten_seq = handwritten_seq.to(device).float()
+                target_seq = target_seq.to(device)
 
                 optimizer.zero_grad()
                 output, hidden, attn = model(handwritten_seq)
@@ -136,8 +136,8 @@ if __name__ == '__main__':
 
             for batch_idx, data in enumerate(val_loader):
                 handwritten_seq, target_seq = data
-                handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
-                target_seq = target_seq.type(torch.LongTensor).to(device)
+                handwritten_seq = handwritten_seq.to(device).float()
+                target_seq = target_seq.to(device)
 
                 output, hidden, attn = model(handwritten_seq)
                 loss = criterion(output.view((-1, model.dict_size['word'])), target_seq.view(-1))
@@ -205,8 +205,8 @@ if __name__ == '__main__':
         # for i in range(100):
             handwritten_seq, target_seq = dt[i]
             handwritten_seq_nan = handwritten_seq
-            handwritten_seq = handwritten_seq.type(torch.LongTensor).to(device).float()
-            target_seq = target_seq.type(torch.LongTensor).to(device)
+            handwritten_seq = handwritten_seq.to(device).float()
+            target_seq = target_seq.to(device)
 
             handwritten_seq = torch.unsqueeze(handwritten_seq, dim=0)
             output, hidden, attn = model(handwritten_seq)

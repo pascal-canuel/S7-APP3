@@ -41,9 +41,14 @@ class HandwrittenWords(Dataset):
                 word.append(self.pad_symbol)
 
             handwritten = item[1]
-            # last_coord = handwritten[:, -1]
-            # pad_coord = last_coord
-            pad_coord = np.array([np.NAN, np.NAN])
+
+            # normalize handwritten data to [0, 1] for each dimension
+            for dim in range(handwritten.shape[0]):
+                handwritten[dim] = (handwritten[dim] - handwritten[dim].min()) / (handwritten[dim].max() - handwritten[dim].min())
+           
+            last_coord = handwritten[:, -1]
+            pad_coord = last_coord
+            # pad_coord = np.array([np.NAN, np.NAN])
             while handwritten.shape[1] < self.max_len['handwritten']:
                 handwritten = np.concatenate((handwritten, pad_coord.reshape(-1, 1)), axis=1)
 
