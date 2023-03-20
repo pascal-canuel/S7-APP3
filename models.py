@@ -15,8 +15,8 @@ class trajectory2seq(nn.Module):
         self.maxlen = maxlen
 
         self.word_embedding = nn.Embedding(self.dict_size['word'], hidden_dim)
-        self.encoder_layer = nn.LSTM(2, hidden_dim, n_layers, batch_first=True, bidirectional=True)
-        self.decoder_layer = nn.LSTM(hidden_dim, hidden_dim, n_layers, batch_first=True, bidirectional=True)
+        self.encoder_layer = nn.GRU(2, hidden_dim, n_layers, batch_first=True, bidirectional=True)
+        self.decoder_layer = nn.GRU(hidden_dim, hidden_dim, n_layers, batch_first=True, bidirectional=True)
 
         self.attention_combine = nn.Linear(4*hidden_dim, hidden_dim)
         self.hidden2query = nn.Linear(2*hidden_dim, 2*hidden_dim)
@@ -59,7 +59,7 @@ class trajectory2seq(nn.Module):
 
     def decoderWithAttention(self, encoder_outs, hidden):
         max_len = self.maxlen['word']
-        batch_size = hidden[0].shape[1]
+        batch_size = hidden.shape[1]
         vec_in = torch.zeros((batch_size, 1)).to(self.device).long()
         vec_out = torch.zeros((batch_size, max_len, self.dict_size['word'])).to(self.device)
         attention_weights = torch.zeros((batch_size, self.maxlen['handwritten'], self.maxlen['word'])).to(self.device)

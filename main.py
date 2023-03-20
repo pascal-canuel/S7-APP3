@@ -43,11 +43,11 @@ if __name__ == '__main__':
     gen_test_images = True
     seed = 1
     n_workers = 0
-    n_epochs = 120
-    lr = 0.01
+    n_epochs = 400
+    lr = 0.02
     batch_size = 64
     train_val_split = 0.8
-    hidden_dim = 10
+    hidden_dim = 12
     n_layers = 2
 
     if seed is not None:
