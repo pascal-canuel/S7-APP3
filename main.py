@@ -195,12 +195,17 @@ if __name__ == '__main__':
 
     if test:
         model = torch.load('model.pt')
-        dataset_test = HandwrittenWords('data_train_val.p')
+        dataset_test = HandwrittenWords('data_test.p')
+        model.maxlen['handwritten'] = dataset_test.max_len['handwritten']
 
         targets = []
         outputs = []
 
         dt = dataset_test
+
+        running_loss_test = 0
+        dist_test = 0
+
         for i in range(len(dt)):
         # for i in range(100):
             handwritten_seq, target_seq = dt[i]
@@ -220,8 +225,19 @@ if __name__ == '__main__':
             targets.append(target_seq_symb)
             outputs.append(output_seq_symb)
 
-            visualize_attention(target_seq_symb, output_seq_symb, torch.squeeze(attn).detach().cpu().numpy(), torch.squeeze(handwritten_seq_nan).detach().cpu().numpy())
-            print(f'Output: {" ".join(output_seq_symb)}; Target: {" ".join(target_seq_symb)}\r\n')
+            # visualize_attention(target_seq_symb, output_seq_symb, torch.squeeze(attn).detach().cpu().numpy(), torch.squeeze(handwritten_seq_nan).detach().cpu().numpy())
+            # print(f'Output: {" ".join(output_seq_symb)}; Target: {" ".join(target_seq_symb)}\r\n')
+
+            a = target_seq_list
+            b = output_list
+            Ma = a.index(1)
+            Mb = b.index(1) if 1 in b else len(b)
+            dist_test += edit_distance(a[:Ma], b[:Mb])
+
+            print('Test: {}/{} Average Edit Distance: {:.6f}'.format(
+                i + 1,
+                len(dt),
+                dist_test / (i + 1)), end='\r')
 
         labels = list(dt.symb2int['word'].keys())
         confusion_matrix(targets, outputs, labels)
